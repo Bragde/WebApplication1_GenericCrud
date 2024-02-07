@@ -1,9 +1,8 @@
 ﻿namespace WebApplication1.Models;
 
-public class EntityBase
+public abstract class EntityBase
 {
     public int Id { get; set; }
     public DateTime Created { get; set; }
-    public DateTime Updated { get; set; }
+    public DateTime? Updated { get; set; }
 }
-
