@@ -1,15 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WebApplication1.Models;
-using WebApplication1.QueryFilter.Extensions;
 using WebApplication1.QueryFilter.Syntax;
 using WebApplication1.QueryFilter.Tokens;
 using WebApplication1.QueryFilter.Utils;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace WebApplication1.QueryFilter;
+namespace WebApplication1.QueryFilter.Extensions;
 
-public static class QueryFilter
+public static class QueryIncludeExtensions
 {
     public static IQueryable<T> ApplyIncludes<T>(this IQueryable<T> query, string[]? includes) where T : EntityBase
     {
@@ -52,8 +51,8 @@ public static class QueryFilter
             if (type == null)
             {
                 methodCallExpression = Expression.Call(
-                    ReflectionCache.Include.MakeGenericMethod(type2.Unwrap(), expression.Type), 
-                    (Expression)(((object)methodCallExpression) ?? ((object)constantExpression)), 
+                    ReflectionCache.Include.MakeGenericMethod(type2.Unwrap(), expression.Type),
+                    (Expression)((object)methodCallExpression ?? constantExpression),
                     Expression.Lambda(expression, parameterExpression));
                 type = type2;
                 type2 = expression.Type;
@@ -61,10 +60,10 @@ public static class QueryFilter
             else
             {
                 methodCallExpression = Expression.Call((
-                    type2.IsCollection() 
-                        ? ReflectionCache.ThenIncludeCollection 
-                        : ReflectionCache.ThenIncludeProperty).MakeGenericMethod(type, type2.Unwrap(), expression.Type), 
-                    methodCallExpression, 
+                    type2.IsCollection()
+                        ? ReflectionCache.ThenIncludeCollection
+                        : ReflectionCache.ThenIncludeProperty).MakeGenericMethod(type, type2.Unwrap(), expression.Type),
+                    methodCallExpression,
                     Expression.Lambda(expression, parameterExpression));
                 type = type2;
                 type2 = methodCallExpression.Type.Unwrap(1);
@@ -86,7 +85,7 @@ public static class QueryFilter
                 tokenStream.Expect(TokenKind.Dot);
                 if (tokenStream.Empty)
                     throw new InvalidOperationException("Unexpected end of expression");
-            }                        
+            }
         }
         return (IQueryable<T>)Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
     }
@@ -130,6 +129,6 @@ public static class QueryFilter
         ArgumentNullException.ThrowIfNull(source, "source");
         List<string> includedProperties = IncludedProperties.Parse(source);
         T val = await source.FirstOrDefaultAsync().ConfigureAwait(continueOnCapturedContext: false);
-        return (val == null) ? null : IncludedProperties.Clean(val, includedProperties);
+        return val == null ? null : IncludedProperties.Clean(val, includedProperties);
     }
 }

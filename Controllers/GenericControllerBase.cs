@@ -18,9 +18,9 @@ public abstract class GenericControllerBase<TModel, TDto>(IServiceProvider servi
     protected readonly IGenericCRUDService<TModel, TDto> _service = serviceProvider.GetRequiredService<IGenericCRUDService<TModel, TDto>>();
 
     [HttpGet]
-    public virtual async Task<IActionResult> List([FromQuery] string[]? includes = null, string? where = null)
+    public virtual async Task<IActionResult> List([FromQuery] string[]? includes = null, string? filter = null)
     {
-        var entities = await _service.List(includes, where);
+        var entities = await _service.List(includes, filter);
         return Ok(entities);
     }
 

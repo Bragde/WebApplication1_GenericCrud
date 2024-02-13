@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using WebApplication1.DAL;
 using WebApplication1.Interfaces;
 using WebApplication1.Models;
-using WebApplication1.QueryFilter;
+using WebApplication1.QueryFilter.Extensions;
 
 namespace WebApplication1.Services;
 
@@ -15,20 +15,21 @@ public class GenericCRUDService<TModel, TDto>(IServiceProvider serviceProvider) 
     protected readonly IMapper _mapper = serviceProvider.GetRequiredService<IMapper>();
     protected readonly ContosoUniversityContext _context = serviceProvider.GetRequiredService<ContosoUniversityContext>();
 
-    public async Task<IEnumerable<TDto>?> List(string[]? includes = null, string? where = null)
+    public async Task<IEnumerable<TDto>?> List(string[]? includes = null, string? filter = null)
     {
-        var query = _context.Set<TModel>().ApplyIncludes(includes);
+        // TODO: Gör så svc använder expression för include och filter, så man kan anropa från annat än controllers.
+        var query = _context.Set<TModel>()
+            .ApplyIncludes(includes)
+            .ApplyFilter(filter);
         var entities = (await query.RemoveCyclesAsync()).ToList();
-
-        //if (where != null)
-        //    query = query.Where(where);
-
         return _mapper.Map<IEnumerable<TDto>>(entities);
     }
 
     public async Task<TDto?> Get(int id, string[]? includes = null)
     {
-        var query = _context.Set<TModel>().ApplyIncludes(includes).Where(e => e.Id == id);
+        var query = _context.Set<TModel>()
+            .ApplyIncludes(includes)
+            .Where(e => e.Id == id);
         var entity = (await query.RemoveCyclesAsync()).FirstOrDefault();
         return _mapper.Map<TDto>(entity);
     }
@@ -69,12 +70,5 @@ public class GenericCRUDService<TModel, TDto>(IServiceProvider serviceProvider) 
     public async Task<bool> EntityExists(int id)
     {
         return await _context.Set<TModel>().AnyAsync(e => e.Id == id);
-    }
-
-    private IQueryable<TModel> ApplyIncludes(IQueryable<TModel> query, params string[] includes)
-    {
-        return includes == null 
-            ? query 
-            : includes.Aggregate(query, (current, include) => current.Include(include));
     }
 }
