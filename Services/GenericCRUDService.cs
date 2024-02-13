@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using WebApplication1.DAL;
 using WebApplication1.Interfaces;
 using WebApplication1.Models;
-using WebApplication1.QueryFilter.Extensions;
+using QueryFilter.Extensions;
 
 namespace WebApplication1.Services;
 
