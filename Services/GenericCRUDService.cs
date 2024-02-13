@@ -26,9 +26,10 @@ public class GenericCRUDService<TModel, TDto>(IServiceProvider serviceProvider) 
         return _mapper.Map<IEnumerable<TDto>>(entities);
     }
 
-    public async Task<TDto?> Get(int id)
+    public async Task<TDto?> Get(int id, string[]? includes = null)
     {
-        var entity = await _context.Set<TModel>().FindAsync(id);
+        var query = _context.Set<TModel>().ApplyIncludes(includes).Where(e => e.Id == id);
+        var entity = (await query.RemoveCyclesAsync()).FirstOrDefault();
         return _mapper.Map<TDto>(entity);
     }
 

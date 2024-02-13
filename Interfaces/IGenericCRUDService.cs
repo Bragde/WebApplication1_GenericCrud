@@ -8,7 +8,7 @@ public interface IGenericCRUDService<TModel, TDto>
     where TDto : EntityBase
 {
     Task<IEnumerable<TDto>?> List(string[]? includes = null, string? where = null);
-    Task<TDto?> Get(int id);
+    Task<TDto?> Get(int id, string[]? includes = null);
     Task<TDto?> Create(TDto dto);
     Task<TDto?> Update(TDto dto);
     Task<bool> Delete(int id);

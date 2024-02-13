@@ -25,9 +25,9 @@ public abstract class GenericControllerBase<TModel, TDto>(IServiceProvider servi
     }
 
     [HttpGet("{id}")]
-    public virtual async Task<IActionResult> Get(int id)
+    public virtual async Task<IActionResult> Get(int id, [FromQuery] string[]? includes = null)
     {
-        var entity = await _service.Get(id);
+        var entity = await _service.Get(id, includes);
         if (entity == null) 
             return NotFound();
 
