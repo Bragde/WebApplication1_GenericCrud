@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using WebApplication1.DAL;
 using WebApplication1.Interfaces;
 using WebApplication1.Models;
+using WebApplication1.QueryFilter;
 
 namespace WebApplication1.Services;
 
@@ -16,12 +17,12 @@ public class GenericCRUDService<TModel, TDto>(IServiceProvider serviceProvider) 
 
     public async Task<IEnumerable<TDto>?> List(string[]? includes = null, string? where = null)
     {
-        var query = ApplyIncludes(_context.Set<TModel>(), includes);
+        var query = _context.Set<TModel>().ApplyIncludes(includes);
+        var entities = (await query.RemoveCyclesAsync()).ToList();
 
         //if (where != null)
         //    query = query.Where(where);
 
-        var entities = await query.ToListAsync();
         return _mapper.Map<IEnumerable<TDto>>(entities);
     }
 
